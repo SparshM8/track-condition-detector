@@ -1,0 +1,125 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0f1115;
+  color: #e6e6e6;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: #9a9a9a;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: #171a21;
+  border: 1px solid #2a2d36;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.upload-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+input[type="file"] {
+  color: #e6e6e6;
+}
+
+input[type="text"] {
+  background: #0f1115;
+  border: 1px solid #2a2d36;
+  color: #e6e6e6;
+  padding: 8px 10px;
+  border-radius: 8px;
+  flex: 1;
+  min-width: 160px;
+}
+
+button {
+  background: #3d7bfd;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #2a2d36;
+  cursor: not-allowed;
+}
+
+.preview-img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 14px;
+  max-height: 320px;
+  display: block;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.badge-dry { background: #1f3d24; color: #7fe28a; }
+.badge-damp { background: #3d3410; color: #f0c94a; }
+.badge-drying { background: #3d2a10; color: #f0a44a; }
+.badge-wet { background: #10233d; color: #4aa8f0; }
+
+.suggestion-banner {
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.suggestion-stable { background: #1f3d24; color: #b7f0be; }
+.suggestion-drying { background: #3d2a10; color: #f0c69a; }
+.suggestion-wetting { background: #10233d; color: #9ac6f0; }
+
+.meta-row {
+  display: flex;
+  gap: 16px;
+  color: #9a9a9a;
+  font-size: 13px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.error-text {
+  color: #f06a6a;
+  margin-top: 10px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
