@@ -13,6 +13,17 @@ export async function analyzeImage(file, weather = "") {
   return data;
 }
 
+export async function analyzeVideo(file, onUploadProgress) {
+  const formData = new FormData();
+  formData.append("video", file);
+
+  const { data } = await api.post("/analyze-video", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress,
+  });
+  return data;
+}
+
 export async function getTrend() {
   const { data } = await api.get("/trend");
   return data;
@@ -24,3 +35,8 @@ export async function getHistory() {
 }
 
 export default api;
+
+export async function clearHistory() {
+  const { data } = await api.delete("/trend/history");
+  return data;
+}

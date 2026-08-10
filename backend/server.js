@@ -8,8 +8,8 @@ import dotenv from "dotenv";
 import path from "path";
 
 import analyzeRouter from "./routes/analyze.js";
+import analyzeVideoRouter from "./routes/analyzeVideo.js";
 import trendRouter from "./routes/trend.js";
-
 
 dotenv.config();
 
@@ -21,6 +21,7 @@ app.use(express.json());
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.use("/api/analyze", analyzeRouter);
+app.use("/api/analyze-video", analyzeVideoRouter);
 app.use("/api/trend", trendRouter);
 
 app.get("/api/health", (req, res) => {

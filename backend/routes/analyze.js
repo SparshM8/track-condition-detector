@@ -42,14 +42,16 @@ router.post("/", upload.single("image"), async (req, res) => {
 
   let result;
   let source = "ai";
+  let debugReason = null;
 
   try {
     if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error("No ANTHROPIC_API_KEY set, falling back to heuristic");
+      throw new Error("ANTHROPIC_API_KEY is missing or not loaded from .env");
     }
     result = await classifyWithAI(imageBuffer, mediaType);
   } catch (err) {
-    console.warn("AI classification failed, using heuristic fallback:", err.message);
+    console.error("AI classification failed, using heuristic fallback:", err.message);
+    debugReason = err.message;
     result = await classifyWithHeuristic(imageBuffer);
     source = "heuristic";
   }
@@ -66,7 +68,7 @@ router.post("/", upload.single("image"), async (req, res) => {
     weather: req.body.weather || "",
   });
 
-  res.json(reading);
+  res.json({ ...reading.toObject(), debugReason });
 });
 
 export default router;

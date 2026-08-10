@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { analyzeImage } from "../api.js";
+import { getBrowserLocation, fetchWeather } from "../utils/weather.js";
 import ConditionBadge from "./ConditionBadge.jsx";
 
 export default function UploadPanel({ onNewReading }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [weather, setWeather] = useState("");
+  const [weatherLoading, setWeatherLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastResult, setLastResult] = useState(null);
@@ -16,6 +18,20 @@ export default function UploadPanel({ onNewReading }) {
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
     setError(null);
+  }
+
+  async function handleAutoWeather() {
+    setWeatherLoading(true);
+    setError(null);
+    try {
+      const { lat, lon } = await getBrowserLocation();
+      const result = await fetchWeather(lat, lon);
+      setWeather(result);
+    } catch (err) {
+      setError("Could not auto-detect weather: " + err.message);
+    } finally {
+      setWeatherLoading(false);
+    }
   }
 
   async function handleSubmit() {
@@ -44,6 +60,9 @@ export default function UploadPanel({ onNewReading }) {
           value={weather}
           onChange={(e) => setWeather(e.target.value)}
         />
+        <button onClick={handleAutoWeather} disabled={weatherLoading} style={{ background: "#2a2d36" }}>
+          {weatherLoading ? "Detecting..." : "Auto-detect"}
+        </button>
         <button onClick={handleSubmit} disabled={!file || loading}>
           {loading ? "Analyzing..." : "Analyze"}
         </button>

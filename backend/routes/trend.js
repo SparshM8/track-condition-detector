@@ -45,4 +45,14 @@ router.get("/history", async (req, res) => {
   res.json(readings);
 });
 
+// DELETE /api/trend/history - clears all readings (careful: irreversible)
+router.delete("/history", async (req, res) => {
+  try {
+    const result = await Reading.deleteMany({});
+    res.json({ deletedCount: result.deletedCount });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to clear history" });
+  }
+});
+
 export default router;
