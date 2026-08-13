@@ -45,8 +45,17 @@ router.get("/history", async (req, res) => {
   res.json(readings);
 });
 
-// DELETE /api/trend/history - clears all readings (careful: irreversible)
+// DELETE /api/trend/history - clears all readings (careful: irreversible).
+// A confirmation token is required in the JSON body so a stray or automated
+// request can't wipe the entire reading history by accident.
 router.delete("/history", async (req, res) => {
+  const expectedToken = process.env.CLEAR_HISTORY_TOKEN || "clear-history";
+  const { token } = (req.body && typeof req.body === "object") ? req.body : {};
+  if (!token || token !== expectedToken) {
+    return res.status(400).json({
+      error: "Confirmation token required — send { token } in the JSON body",
+    });
+  }
   try {
     const result = await Reading.deleteMany({});
     res.json({ deletedCount: result.deletedCount });

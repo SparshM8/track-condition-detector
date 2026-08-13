@@ -24,11 +24,22 @@ tracks the trend over time, and suggests when a tire change window may be approa
 ```bash
 cd backend
 npm install
-cp .env.example .env
-# edit .env: add your MONGODB_URI and ANTHROPIC_API_KEY
+# create a .env file with your credentials (see .env format below)
+# local development:
+export MONGODB_URI="mongodb://localhost:27017/trackdb"
+export ANTHROPIC_API_KEY="sk-ant-..."
 npm run dev
 ```
 Backend runs on `http://localhost:5000`.
+
+**`.env` format** (create this file manually — it is gitignored and not committed):
+```env
+MONGODB_URI=mongodb://localhost:27017/trackdb
+ANTHROPIC_API_KEY=sk-ant-...
+PORT=5000
+TREND_WINDOW=10
+CLEAR_HISTORY_TOKEN=clear-history
+```
 
 **MongoDB**: easiest option is a free MongoDB Atlas cluster (https://www.mongodb.com/cloud/atlas) —
 create a cluster, get the connection string, paste it into `.env`. Local MongoDB also works if
@@ -36,6 +47,19 @@ you have it installed (`mongodb://localhost:27017/trackdb`).
 
 **Anthropic API key**: get one from https://console.anthropic.com/. If you skip this, the app
 still works using the local heuristic classifier — just less accurate.
+
+### Deployment (Vercel / GitHub)
+Secrets are configured as **GitHub repository secrets** and injected at deploy time:
+
+| Secret | Purpose |
+|---|---|
+| `MONGODB_URI` | MongoDB connection string (e.g. MongoDB Atlas) |
+| `ANTHROPIC_API_KEY` | Anthropic API key for AI classification |
+| `PORT` | Server port (default `5000`) |
+| `TREND_WINDOW` | Number of recent readings used for trend math (default `10`) |
+| `CLEAR_HISTORY_TOKEN` | Confirmation token for clearing history (default `clear-history`) |
+
+When adding the secrets in GitHub, go to **Repository → Settings → Secrets and variables → Actions** and add them with the exact names above.
 
 ### 2. Frontend
 ```bash
@@ -46,24 +70,33 @@ npm run dev
 Frontend runs on `http://localhost:5173` (Vite proxies `/api` and `/uploads` to the backend).
 
 ## API endpoints
-- `POST /api/analyze` — multipart form with `image` file (and optional `weather` text field). Returns the saved reading.
-- `GET /api/trend` — last N readings + computed slope, trend direction, and suggestion.
-- `GET /api/trend/history` — full reading history.
 - `GET /api/health` — health check.
+- `POST /api/analyze` — multipart form with `image` file (and optional `weather` text field). Classifies the image (AI with heuristic fallback), stores the reading, and returns it.
+- `POST /api/analyze-video` — multipart form with `video` file. Extracts frames (up to 15, sampled at 0.5 fps), classifies each one, and returns `{ framesProcessed, readings }`.
+- `GET /api/trend` — last N readings + computed slope, trend direction, suggestion, and `latestLabel`.
+- `GET /api/trend/history` — full reading history.
+- `DELETE /api/trend/history` — clears **all** readings (irreversible). Requires a confirmation token in the JSON body: `{ "token": "<CLEAR_HISTORY_TOKEN>" }` — requests without a matching token are rejected with 400.
+- `GET /uploads/<filename>` — static serving of uploaded images and video frames.
 
 ## Project structure
 ```
 backend/
   models/Reading.js       - Mongoose schema
   routes/analyze.js       - POST /api/analyze
-  routes/trend.js         - GET /api/trend, /api/trend/history
+  routes/analyzeVideo.js  - POST /api/analyze-video (frame extraction + batch classification)
+  routes/trend.js         - GET /api/trend, GET/DELETE /api/trend/history
+  scripts/smokeTest.js    - offline smoke test (stubbed AI classifier, no DB needed)
   utils/classify.js       - Anthropic vision API call
   utils/heuristic.js      - local brightness-based fallback classifier
   utils/trend.js          - slope calculation + suggestion rules
+  utils/videoFrames.js    - ffmpeg-based frame extraction
   server.js               - Express app entrypoint
 
 frontend/
-  src/components/UploadPanel.jsx   - image upload + preview + result
+  src/components/UploadPanel.jsx     - image upload + preview + result
+  src/components/VideoUploadPanel.jsx - video upload + progress + results
+  src/components/LiveCameraPanel.jsx  - webcam capture → reuse of /api/analyze
+  src/components/HistoryGallery.jsx   - full history + clear-history action
   src/components/ConditionBadge.jsx - colored condition label
   src/components/TrendChart.jsx    - Recharts line chart + suggestion banner
   src/App.jsx                      - polls /api/trend every 4s

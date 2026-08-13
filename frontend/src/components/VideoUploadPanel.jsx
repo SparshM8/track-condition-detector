@@ -36,7 +36,7 @@ export default function VideoUploadPanel({ onNewReadings }) {
 
   return (
     <div className="card">
-      <div className="section-title">Upload a video clip</div>
+      <div className="card-title">Upload a video clip</div>
       <p style={{ color: "#9a9a9a", marginTop: 0 }}>
         Simulates a live camera by sampling frames from a recorded clip (e.g. onboard footage)
         and building the trend instantly — good for demoing "drying over time" without waiting
