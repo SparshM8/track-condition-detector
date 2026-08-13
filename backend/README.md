@@ -58,8 +58,12 @@ Secrets are configured as **GitHub repository secrets** and injected at deploy t
 | `PORT` | Server port (default `5000`) |
 | `TREND_WINDOW` | Number of recent readings used for trend math (default `10`) |
 | `CLEAR_HISTORY_TOKEN` | Confirmation token for clearing history (default `clear-history`) |
+| `UPLOADS_DIR` | Optional absolute path for upload storage. If unset, serverless uses `/tmp/...` automatically. |
 
 When adding the secrets in GitHub, go to **Repository → Settings → Secrets and variables → Actions** and add them with the exact names above.
+
+**Serverless storage note**: uploaded files are stored in a writable runtime directory.  
+On Vercel/AWS Lambda, this defaults to `/tmp/track-condition-detector/uploads` unless `UPLOADS_DIR` is provided.
 
 ### 2. Frontend
 ```bash

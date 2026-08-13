@@ -62,11 +62,11 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import path from "path";
 
 import analyzeRouter from "./routes/analyze.js";
 import analyzeVideoRouter from "./routes/analyzeVideo.js";
 import trendRouter from "./routes/trend.js";
+import { ensureUploadsDir } from "./utils/uploads.js";
 
 dotenv.config();
 
@@ -75,7 +75,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(path.resolve("uploads")));
+app.use("/uploads", express.static(ensureUploadsDir()));
 
 app.use("/api/analyze", analyzeRouter);
 app.use("/api/analyze-video", analyzeVideoRouter);

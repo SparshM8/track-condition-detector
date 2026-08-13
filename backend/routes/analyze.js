@@ -75,16 +75,15 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import fs from "fs";
 import { promises as fsPromises } from "fs";
 import Reading from "../models/Reading.js";
 import { classifyWithAI } from "../utils/classify.js";
 import { classifyWithHeuristic } from "../utils/heuristic.js";
+import { ensureUploadsDir } from "../utils/uploads.js";
 
 const router = express.Router();
 
-const uploadsDir = path.resolve("uploads");
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+const uploadsDir = ensureUploadsDir();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
