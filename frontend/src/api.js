@@ -36,7 +36,13 @@ export async function getHistory() {
 
 export default api;
 
+// The backend requires a confirmation token to clear history, preventing
+// accidental wipes from stray or automated requests.
+const CLEAR_HISTORY_TOKEN = "clear-history";
+
 export async function clearHistory() {
-  const { data } = await api.delete("/trend/history");
+  const { data } = await api.delete("/trend/history", {
+    data: { token: CLEAR_HISTORY_TOKEN },
+  });
   return data;
 }
