@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { analyzeImage } from "../api.js";
 import { getBrowserLocation, fetchWeather } from "../utils/weather.js";
+import { asText, extractErrorMessage } from "../utils/text.js";
 import ConditionBadge from "./ConditionBadge.jsx";
 
 export default function UploadPanel({ onNewReading }) {
@@ -28,7 +29,7 @@ export default function UploadPanel({ onNewReading }) {
       const result = await fetchWeather(lat, lon);
       setWeather(result);
     } catch (err) {
-      setError("Could not auto-detect weather: " + err.message);
+      setError(`Could not auto-detect weather: ${extractErrorMessage(err, "Unknown error")}`);
     } finally {
       setWeatherLoading(false);
     }
@@ -43,7 +44,7 @@ export default function UploadPanel({ onNewReading }) {
       setLastResult(result);
       onNewReading(result);
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      setError(extractErrorMessage(err, "Image analysis failed"));
     } finally {
       setLoading(false);
     }
@@ -76,8 +77,8 @@ export default function UploadPanel({ onNewReading }) {
         <div style={{ marginTop: 14 }}>
           <ConditionBadge label={lastResult.label} confidence={lastResult.confidence} />
           <div className="meta-row">
-            <span>Reasoning: {lastResult.reasoning}</span>
-            <span>Source: {lastResult.source}</span>
+            <span>Reasoning: {asText(lastResult.reasoning, "Not provided")}</span>
+            <span>Source: {asText(lastResult.source, "unknown")}</span>
           </div>
         </div>
       )}

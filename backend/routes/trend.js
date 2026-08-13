@@ -6,6 +6,16 @@ const router = express.Router();
 
 const TREND_WINDOW = parseInt(process.env.TREND_WINDOW || "10", 10);
 
+function asText(value, fallback = "") {
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  if (value && typeof value === "object" && typeof value.message === "string") {
+    return value.message;
+  }
+  return fallback;
+}
+
 // GET /api/trend - recent readings + computed trend + suggestion
 router.get("/", async (req, res) => {
   const readings = await Reading.find()
@@ -34,8 +44,8 @@ router.get("/", async (req, res) => {
     readings: chronological,
     slope,
     trendDirection,
-    suggestion,
-    latestLabel: chronological[chronological.length - 1].label,
+    suggestion: asText(suggestion, "Unable to derive suggestion"),
+    latestLabel: asText(chronological[chronological.length - 1].label, ""),
   });
 });
 

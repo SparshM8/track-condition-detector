@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getHistory, clearHistory } from "../api.js";
+import { extractErrorMessage } from "../utils/text.js";
 import ConditionBadge from "./ConditionBadge.jsx";
 
 function formatTime(ts) {
@@ -26,7 +27,7 @@ export default function HistoryGallery() {
       const data = await getHistory();
       setReadings([...data].reverse());
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      setError(extractErrorMessage(err, "Failed to load history"));
     } finally {
       setLoading(false);
     }
@@ -45,7 +46,7 @@ export default function HistoryGallery() {
       setConfirmOpen(false);
       console.log(`Cleared ${result.deletedCount} readings`);
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      setError(extractErrorMessage(err, "Failed to clear history"));
     } finally {
       setClearing(false);
     }

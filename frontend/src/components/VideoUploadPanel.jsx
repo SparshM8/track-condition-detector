@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { analyzeVideo } from "../api.js";
+import { extractErrorMessage } from "../utils/text.js";
 
 export default function VideoUploadPanel({ onNewReadings }) {
   const [file, setFile] = useState(null);
@@ -28,7 +29,7 @@ export default function VideoUploadPanel({ onNewReadings }) {
       setResult(data);
       onNewReadings(data.readings);
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      setError(extractErrorMessage(err, "Video analysis failed"));
     } finally {
       setLoading(false);
     }

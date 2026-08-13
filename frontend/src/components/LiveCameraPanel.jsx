@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { analyzeImage } from "../api.js";
 import ConditionBadge from "./ConditionBadge.jsx";
+import { asText, extractErrorMessage } from "../utils/text.js";
 
 const CAPTURE_INTERVAL_MS = 15000; // snapshot every 15s while live
 
@@ -35,7 +36,7 @@ export default function LiveCameraPanel({ onNewReading }) {
           setCaptureCount((c) => c + 1);
           onNewReading(result);
         } catch (err) {
-          setError(err.response?.data?.error || err.message);
+          setError(extractErrorMessage(err, "Image analysis failed"));
         }
       },
       "image/jpeg",
@@ -56,7 +57,7 @@ export default function LiveCameraPanel({ onNewReading }) {
       }
       setIsLive(true);
     } catch (err) {
-      setError("Could not access camera: " + err.message);
+      setError(`Could not access camera: ${extractErrorMessage(err, "Unknown error")}`);
     }
   }
 
@@ -133,7 +134,7 @@ export default function LiveCameraPanel({ onNewReading }) {
         <div style={{ marginTop: 14 }}>
           <ConditionBadge label={lastResult.label} confidence={lastResult.confidence} />
           <div className="meta-row">
-            <span>Reasoning: {lastResult.reasoning}</span>
+            <span>Reasoning: {asText(lastResult.reasoning, "Not provided")}</span>
           </div>
         </div>
       )}
