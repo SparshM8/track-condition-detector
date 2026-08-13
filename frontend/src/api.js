@@ -85,8 +85,22 @@ export async function getHealth() {
 }
 
 export async function getTrend() {
-  const { data } = await api.get("/trend");
-  return data;
+  try {
+    const { data } = await api.get("/trend");
+    return data;
+  } catch (err) {
+    // If backend /api/trend is not available (404/500) fall back to the
+    // local sample data so the UI can still render a demo graph.
+    console.warn("getTrend failed, falling back to sample data:", err.message);
+    try {
+      const res = await fetch('/sample-trend.json');
+      if (res.ok) return await res.json();
+      throw new Error(`Sample data fetch failed: ${res.status}`);
+    } catch (fallbackErr) {
+      console.error("Failed to load sample trend data:", fallbackErr);
+      throw err; // rethrow original so callers know the request failed
+    }
+  }
 }
 
 export async function getHistory() {

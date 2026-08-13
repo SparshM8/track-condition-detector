@@ -1,0 +1,12 @@
+{
+  "readings": [
+    { "_id": "r1", "timestamp": "2026-08-13T20:50:00.000Z", "label": "Dry", "wetnessIndex": 0, "confidence": 0.85, "imageUrl": "/uploads/sample1.jpg" },
+    { "_id": "r2", "timestamp": "2026-08-13T20:52:00.000Z", "label": "Drying", "wetnessIndex": 1, "confidence": 0.78, "imageUrl": "/uploads/sample2.jpg" },
+    { "_id": "r3", "timestamp": "2026-08-13T20:54:00.000Z", "label": "Damp", "wetnessIndex": 2, "confidence": 0.72, "imageUrl": "/uploads/sample3.jpg" },
+    { "_id": "r4", "timestamp": "2026-08-13T20:56:00.000Z", "label": "Wet", "wetnessIndex": 3, "confidence": 0.66, "imageUrl": "/uploads/sample4.jpg" }
+  ],
+  "slope": 0.8,
+  "trendDirection": "wetting",
+  "suggestion": "Track getting wetter: consider wet tires",
+  "latestLabel": "Wet"
+}

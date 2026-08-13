@@ -7,6 +7,7 @@ import LiveCameraPanel from "./components/LiveCameraPanel.jsx";
 import VideoUploadPanel from "./components/VideoUploadPanel.jsx";
 import TrendChart from "./components/TrendChart.jsx";
 import HistoryGallery from "./components/HistoryGallery.jsx";
+import BackgroundVideo from "./components/BackgroundVideo.jsx";
 import { getTrend } from "./api.js";
 
 const POLL_INTERVAL_MS = 4000;
@@ -21,6 +22,7 @@ const TABS = [
 export default function App() {
   const [trend, setTrend] = useState(null);
   const [activeTab, setActiveTab] = useState("live");
+  const [bgOpacity, setBgOpacity] = useState(0.08);
 
   const refreshTrend = useCallback(async () => {
     try {
@@ -39,6 +41,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <BackgroundVideo src="/background.mp4" opacity={bgOpacity} />
       <DashboardHeader />
       <div className="dashboard">
         <p className="page-subtitle">
@@ -77,6 +80,12 @@ export default function App() {
             Trend chart uses the last 10 readings; the history view keeps every reading.
             Re-analyzing with new images refreshes the live dashboard above.
           </p>
+        </div>
+
+        {/* Background video opacity control (adjust as needed) */}
+        <div style={{ position: 'fixed', right: 12, bottom: 12, zIndex: 60, background: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 8 }}>
+          <label style={{ color: '#fff', fontSize: 12 }}>BG opacity: {Math.round(bgOpacity * 100)}%</label>
+          <input type="range" min="0" max="0.6" step="0.01" value={bgOpacity} onChange={(e) => setBgOpacity(parseFloat(e.target.value))} />
         </div>
       </div>
     </div>
