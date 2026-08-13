@@ -24,6 +24,11 @@ export async function analyzeVideo(file, onUploadProgress) {
   return data;
 }
 
+export async function getHealth() {
+  const { data } = await api.get("/health");
+  return data;
+}
+
 export async function getTrend() {
   const { data } = await api.get("/trend");
   return data;

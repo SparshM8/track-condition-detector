@@ -89,7 +89,7 @@ export default function LiveCameraPanel({ onNewReading }) {
 
   return (
     <div className="card">
-      <div className="section-title">Live camera feed</div>
+      <div className="card-title">Live camera feed</div>
 
       <video
         ref={videoRef}
