@@ -1,12 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Change this if Anthropic releases a newer model you'd rather use.
-// Any current Claude model with vision support works here.
-const MODEL = "claude-sonnet-5";
+// Change this if Google releases a newer vision-capable model you'd rather use.
+const MODEL = "gemini-2.0-flash";
 
 const SYSTEM_PROMPT = `You are a racetrack surface analyst. You look at a single photo of a
 race track surface and classify its condition. Use these visual cues:
@@ -20,7 +17,7 @@ Respond with ONLY a JSON object, no other text, no markdown fences:
 {"label": "Dry" | "Damp" | "Wet" | "Drying", "confidence": 0.0-1.0, "reasoning": "one short sentence"}`;
 
 /**
- * Classify a track image using Claude's vision capability.
+ * Classify a track image using Gemini's vision capability.
  * @param {Buffer} imageBuffer - raw image bytes
  * @param {string} mediaType - e.g. "image/jpeg", "image/png"
  * @returns {Promise<{label: string, confidence: number, reasoning: string}>}
@@ -28,38 +25,28 @@ Respond with ONLY a JSON object, no other text, no markdown fences:
 export async function classifyWithAI(imageBuffer, mediaType) {
   const base64Image = imageBuffer.toString("base64");
 
-  const response = await anthropic.messages.create({
+  const model = genAI.getGenerativeModel({
     model: MODEL,
-    max_tokens: 200,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: mediaType,
-              data: base64Image,
-            },
-          },
-          {
-            type: "text",
-            text: "Classify this track surface image.",
-          },
-        ],
-      },
-    ],
+    systemInstruction: SYSTEM_PROMPT,
   });
 
-  const textBlock = response.content.find((block) => block.type === "text");
-  if (!textBlock) {
+  const result = await model.generateContent([
+    {
+      inlineData: {
+        mimeType: mediaType,
+        data: base64Image,
+      },
+    },
+    { text: "Classify this track surface image." },
+  ]);
+
+  const text = result.response.text();
+  if (!text) {
     throw new Error("No text response from classification model");
   }
 
   // Strip markdown fences defensively in case the model adds them anyway.
-  const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+  const cleaned = text.replace(/```json|```/g, "").trim();
   const parsed = JSON.parse(cleaned);
 
   if (!["Dry", "Damp", "Wet", "Drying"].includes(parsed.label)) {

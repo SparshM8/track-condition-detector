@@ -8,6 +8,7 @@ import VideoUploadPanel from "./components/VideoUploadPanel.jsx";
 import TrendChart from "./components/TrendChart.jsx";
 import HistoryGallery from "./components/HistoryGallery.jsx";
 import Background3D from "./components/Background3D.jsx";
+import BackgroundVideo from "./components/BackgroundVideo.jsx";
 import BarGraph from "./components/BarGraph.jsx";
 import { getTrend } from "./api.js";
 
@@ -49,7 +50,8 @@ export default function App() {
   return (
     <div className="app">
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-        <Background3D imageUrl={backgroundImage} opacity={bgOpacity} />
+        <BackgroundVideo src="/background.mp4" opacity={bgOpacity} />
+        <Background3D imageUrl={backgroundImage} opacity={bgOpacity * 0.5} />
       </div>
       <DashboardHeader />
       <div className="dashboard">
