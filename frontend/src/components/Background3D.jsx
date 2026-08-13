@@ -28,7 +28,8 @@ function sampleImageColors(img, sampleCount = 5) {
   }
 }
 
-export default function Background3D({ imageSrc, opacity = 0.08 }) {
+export default function Background3D({ imageSrc, imageUrl, opacity = 0.08 }) {
+  const src = imageSrc || imageUrl;
   const ref = useRef(null);
   const layersRef = useRef([]);
 
@@ -39,7 +40,7 @@ export default function Background3D({ imageSrc, opacity = 0.08 }) {
 
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.src = imageSrc || "/background.jpg";
+    img.src = src || "/background.jpg";
     img.onload = () => {
       if (!mounted) return;
       const colors = sampleImageColors(img, 4);
