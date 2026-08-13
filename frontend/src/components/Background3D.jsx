@@ -1,9 +1,5 @@
 import React, { useEffect, useRef } from "react";
 
-// Lightweight animated background that adapts to a source image's dominant
-// colors. No external dependencies. It uses layered blurred divs animated via
-// CSS transforms to create a 3D-like parallax/video feel.
-
 function sampleImageColors(img, sampleCount = 5) {
   try {
     const canvas = document.createElement("canvas");
@@ -17,7 +13,6 @@ function sampleImageColors(img, sampleCount = 5) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-      // bucket colors coarsely
       const key = `${Math.round(r / 32) * 32},${Math.round(g / 32) * 32},${Math.round(b / 32) * 32}`;
       counts[key] = (counts[key] || 0) + 1;
     }
@@ -44,7 +39,6 @@ export default function Background3D({ imageSrc, imageUrl, opacity = 0.08 }) {
     img.onload = () => {
       if (!mounted) return;
       const colors = sampleImageColors(img, 4);
-      // create/update layers
       const layers = colors.map((c, i) => {
         const el = layersRef.current[i] || document.createElement("div");
         el.style.position = "absolute";
@@ -58,11 +52,9 @@ export default function Background3D({ imageSrc, imageUrl, opacity = 0.08 }) {
         return el;
       });
 
-      // clear container and append layers in order
       container.innerHTML = "";
       layers.forEach((el) => container.appendChild(el));
 
-      // animate layers subtly
       let t = 0;
       function frame() {
         t += 0.0025;
@@ -78,7 +70,6 @@ export default function Background3D({ imageSrc, imageUrl, opacity = 0.08 }) {
     };
 
     img.onerror = () => {
-      // fallback: simple dark layers
       const defaultColors = ["#08121a", "#0e2229", "#11252b"];
       container.innerHTML = "";
       defaultColors.forEach((c, i) => {
@@ -95,7 +86,7 @@ export default function Background3D({ imageSrc, imageUrl, opacity = 0.08 }) {
     return () => {
       mounted = false;
     };
-  }, [imageSrc, opacity]);
+  }, [imageSrc, imageUrl, opacity]);
 
   return (
     <div

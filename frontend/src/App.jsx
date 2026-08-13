@@ -7,7 +7,6 @@ import LiveCameraPanel from "./components/LiveCameraPanel.jsx";
 import VideoUploadPanel from "./components/VideoUploadPanel.jsx";
 import TrendChart from "./components/TrendChart.jsx";
 import HistoryGallery from "./components/HistoryGallery.jsx";
-import BackgroundVideo from "./components/BackgroundVideo.jsx";
 import Background3D from "./components/Background3D.jsx";
 import BarGraph from "./components/BarGraph.jsx";
 import { getTrend } from "./api.js";
@@ -24,8 +23,10 @@ const TABS = [
 export default function App() {
   const [trend, setTrend] = useState(null);
   const [activeTab, setActiveTab] = useState("live");
-  const [bgOpacity, setBgOpacity] = useState(0.08);
-  const [backgroundImage, setBackgroundImage] = useState(null);
+  const [bgOpacity, setBgOpacity] = useState(0.15);
+  // Default to the placeholder background so something shows before the
+  // first reading comes in; gets replaced with the latest reading's image.
+  const [backgroundImage, setBackgroundImage] = useState("/background.jpg");
 
   const refreshTrend = useCallback(async () => {
     try {
@@ -48,8 +49,7 @@ export default function App() {
   return (
     <div className="app">
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-        <BackgroundVideo src="/background.mp4" opacity={bgOpacity} />
-        <Background3D imageUrl={backgroundImage} />
+        <Background3D imageUrl={backgroundImage} opacity={bgOpacity} />
       </div>
       <DashboardHeader />
       <div className="dashboard">
@@ -73,7 +73,7 @@ export default function App() {
         {/* Show a bar graph below the chart when we have trend readings (visualizes recent wetnessIndex) */}
         {trend && Array.isArray(trend.readings) && trend.readings.length > 0 && (
           <div style={{ marginTop: 18 }}>
-            <BarGraph data={trend.readings} />
+            <BarGraph readings={trend.readings} />
           </div>
         )}
 
@@ -98,7 +98,7 @@ export default function App() {
           </p>
         </div>
 
-        {/* Background video opacity control (adjust as needed) */}
+        {/* Background opacity control (adjust as needed) */}
         <div style={{ position: 'fixed', right: 12, bottom: 12, zIndex: 60, background: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 8 }}>
           <label style={{ color: '#fff', fontSize: 12 }}>BG opacity: {Math.round(bgOpacity * 100)}%</label>
           <input type="range" min="0" max="0.6" step="0.01" value={bgOpacity} onChange={(e) => setBgOpacity(parseFloat(e.target.value))} />

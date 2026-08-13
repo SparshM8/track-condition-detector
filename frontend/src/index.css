@@ -689,3 +689,13 @@ button.stop:hover:not(:disabled) {
   background: #a82525;
   box-shadow: none;
 }
+
+/* body pe dark base color rakho — isse white flash nahi hoga */
+body {
+  background: #05070d;
+}
+
+/* sirf .app ko transparent karo taaki Background3D peeche se dikhe */
+.app {
+  background: transparent !important;
+}
