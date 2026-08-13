@@ -19,8 +19,8 @@ export default function TrendChart({ trend }) {
   if (!trend || trend.readings.length === 0) {
     return (
       <div className="card">
-        <div className="section-title">Trend</div>
-        <p style={{ color: "#9a9a9a" }}>No readings yet — analyze an image to start tracking.</p>
+        <div className="card-title">Track Trend</div>
+        <p className="empty-state">No readings yet — analyze an image to start tracking.</p>
       </div>
     );
   }
@@ -31,16 +31,34 @@ export default function TrendChart({ trend }) {
     label: r.label,
   }));
 
-  const bannerClass =
+  const lineColor =
+    trend.trendDirection === "wetting"
+      ? "#3498db"
+      : trend.trendDirection === "drying"
+      ? "#f1c40f"
+      : "#2ecc71";
+
+  const arrow =
     trend.trendDirection === "drying"
-      ? "suggestion-drying"
+      ? { icon: "↓", label: "Track is drying", cls: "trend-arrow-drying" }
       : trend.trendDirection === "wetting"
-      ? "suggestion-wetting"
-      : "suggestion-stable";
+      ? { icon: "↑", label: "Track is wetting", cls: "trend-arrow-wetting" }
+      : trend.trendDirection === "stable"
+      ? { icon: "→", label: "Track is stable", cls: "trend-arrow-stable" }
+      : { icon: "—", label: "Waiting for data", cls: "trend-arrow-unknown" };
+
+  const suggestionCardCls =
+    trend.trendDirection === "drying"
+      ? "suggestion-drying-card"
+      : trend.trendDirection === "wetting"
+      ? "suggestion-wetting-card"
+      : trend.trendDirection === "stable"
+      ? "suggestion-stable-card"
+      : "suggestion-none-card";
 
   return (
     <div className="card">
-      <div className="section-title">Trend</div>
+      <div className="card-title">Track Trend</div>
 
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={chartData}>
@@ -61,21 +79,22 @@ export default function TrendChart({ trend }) {
           <Line
             type="monotone"
             dataKey="wetnessIndex"
-            stroke="#3d7bfd"
-            strokeWidth={2}
-            dot={{ r: 3 }}
+            stroke={lineColor}
+            strokeWidth={2.5}
+            dot={{ r: 4, fill: lineColor }}
           />
         </LineChart>
       </ResponsiveContainer>
 
-      <div className={`suggestion-banner ${bannerClass}`}>
-        {trend.suggestion}
-      </div>
-
-      <div className="meta-row">
-        <span>Trend direction: {trend.trendDirection}</span>
-        <span>Slope: {trend.slope.toFixed(2)}</span>
-        <span>Latest: {trend.latestLabel}</span>
+      <div className={`card suggestion-card ${suggestionCardCls}`} style={{ marginTop: 18 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+          <span className={`trend-arrow ${arrow.cls}`}>{arrow.icon}</span>
+          <div>
+            <div style={{ fontSize: 12, color: "#8b97a8", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{arrow.label}</div>
+            <div className="suggestion-text">{trend.suggestion}</div>
+            <div className="slope-stat">Slope: {trend.slope >= 0 ? "+" : ""}{trend.slope.toFixed(2)} · Latest: {trend.latestLabel}</div>
+          </div>
+        </div>
       </div>
     </div>
   );

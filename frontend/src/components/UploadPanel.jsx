@@ -51,7 +51,7 @@ export default function UploadPanel({ onNewReading }) {
 
   return (
     <div className="card">
-      <div className="section-title">Upload a track image</div>
+      <div className="card-title">Upload a track image</div>
       <div className="upload-row">
         <input type="file" accept="image/*" onChange={handleFileChange} />
         <input
@@ -60,7 +60,7 @@ export default function UploadPanel({ onNewReading }) {
           value={weather}
           onChange={(e) => setWeather(e.target.value)}
         />
-        <button onClick={handleAutoWeather} disabled={weatherLoading} style={{ background: "#2a2d36" }}>
+        <button onClick={handleAutoWeather} disabled={weatherLoading} className="secondary">
           {weatherLoading ? "Detecting..." : "Auto-detect"}
         </button>
         <button onClick={handleSubmit} disabled={!file || loading}>
