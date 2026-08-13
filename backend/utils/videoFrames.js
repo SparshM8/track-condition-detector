@@ -1,7 +1,14 @@
 import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath from "ffmpeg-static";
+import { createRequire } from "node:module";
 import path from "path";
 import fs from "fs";
+
+// ffmpeg-static is a CommonJS module. On some runtimes (e.g. Vercel Node 22),
+// the ESM default import resolves to undefined and ffmpeg.setFfmpegPath gets
+// an undefined path, crashing every serverless invocation at module load time.
+// Load it through createRequire for reliable resolution.
+const require = createRequire(import.meta.url);
+const ffmpegPath = require("ffmpeg-static");
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
