@@ -8,6 +8,8 @@ import VideoUploadPanel from "./components/VideoUploadPanel.jsx";
 import TrendChart from "./components/TrendChart.jsx";
 import HistoryGallery from "./components/HistoryGallery.jsx";
 import BackgroundVideo from "./components/BackgroundVideo.jsx";
+import Background3D from "./components/Background3D.jsx";
+import BarGraph from "./components/BarGraph.jsx";
 import { getTrend } from "./api.js";
 
 const POLL_INTERVAL_MS = 4000;
@@ -23,11 +25,15 @@ export default function App() {
   const [trend, setTrend] = useState(null);
   const [activeTab, setActiveTab] = useState("live");
   const [bgOpacity, setBgOpacity] = useState(0.08);
+  const [backgroundImage, setBackgroundImage] = useState(null);
 
   const refreshTrend = useCallback(async () => {
     try {
       const data = await getTrend();
       setTrend(data);
+      // update background using latest reading image if available
+      const latest = Array.isArray(data?.readings) && data.readings.length ? data.readings[data.readings.length - 1] : null;
+      if (latest?.imageUrl) setBackgroundImage(latest.imageUrl);
     } catch (err) {
       console.error("Failed to fetch trend:", err.message);
     }
@@ -41,7 +47,10 @@ export default function App() {
 
   return (
     <div className="app">
-      <BackgroundVideo src="/background.mp4" opacity={bgOpacity} />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <BackgroundVideo src="/background.mp4" opacity={bgOpacity} />
+        <Background3D imageUrl={backgroundImage} />
+      </div>
       <DashboardHeader />
       <div className="dashboard">
         <p className="page-subtitle">
@@ -55,11 +64,18 @@ export default function App() {
           <SuggestionCard trend={trend} />
         </div>
 
-        {activeTab === "live" && <LiveCameraPanel onNewReading={refreshTrend} />}
-        {activeTab === "video" && <VideoUploadPanel onNewReadings={refreshTrend} />}
-        {activeTab === "image" && <UploadPanel onNewReading={refreshTrend} />}
+        {activeTab === "live" && <LiveCameraPanel onNewReading={(r) => { refreshTrend(); if (r?.imageUrl) setBackgroundImage(r.imageUrl); }} />}
+        {activeTab === "video" && <VideoUploadPanel onNewReadings={(data) => { refreshTrend(); const first = Array.isArray(data?.readings) && data.readings[0]; if (first?.imageUrl) setBackgroundImage(first.imageUrl); }} />}
+        {activeTab === "image" && <UploadPanel onNewReading={(r) => { refreshTrend(); if (r?.imageUrl) setBackgroundImage(r.imageUrl); }} />}
 
         {activeTab !== "history" && <TrendChart trend={trend} />}
+
+        {/* Show a bar graph below the chart when we have trend readings (visualizes recent wetnessIndex) */}
+        {trend && Array.isArray(trend.readings) && trend.readings.length > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <BarGraph data={trend.readings} />
+          </div>
+        )}
 
         {activeTab === "history" && <HistoryGallery />}
 
