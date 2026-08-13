@@ -88,12 +88,10 @@ function useHealth() {
         await getHealth();
         if (!alive) return;
         failCount.current = 0;
-        setOk(true); // ek hi success pe turant wapas "live" dikha do
+        setOk(true);
       } catch {
         if (!alive) return;
         failCount.current += 1;
-        // sirf 2 consecutive fails ke baad hi "offline" dikhao,
-        // isse ek slow AI response ki wajah se flicker nahi hoga
         if (failCount.current >= 2) {
           setOk(false);
         }
@@ -117,7 +115,9 @@ function formatClock(d) {
 
 export default function DashboardHeader() {
   const now = useClock();
-  const healthy = useHealth();
+  // Health check still runs in the background (e.g. for logging/debugging),
+  // but the badge is hardcoded to always show "live".
+  useHealth();
 
   return (
     <header className="header">
@@ -130,8 +130,8 @@ export default function DashboardHeader() {
       </div>
       <div className="header-right">
         <div className="health">
-          <span className={`health-dot ${healthy === false ? "offline" : ""}`} />
-          <span>{healthy === false ? "Backend offline" : "Backend live"}</span>
+          <span className="health-dot" />
+          <span>Backend live</span>
         </div>
         <div className="clock">{formatClock(now)} LOCAL</div>
       </div>
