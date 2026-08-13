@@ -11,6 +11,14 @@ function formatTime(ts) {
   });
 }
 
+// Only ever render strings/numbers in JSX. Protects against the backend
+// ever sending back an error-shaped object instead of a plain string,
+// which otherwise crashes the app with React error #31.
+function asText(value, fallback = "") {
+  if (typeof value === "string" || typeof value === "number") return value;
+  return fallback;
+}
+
 const COLORS = {
   Dry: "#2ecc71",
   Drying: "#f1c40f",
@@ -22,11 +30,11 @@ export default function ConditionHero({ trend }) {
   const latest = trend?.readings?.length
     ? trend.readings[trend.readings.length - 1]
     : null;
-  const label = latest?.label || null;
+  const label = typeof latest?.label === "string" ? latest.label : null;
   const confidence = latest?.confidence;
   const source = latest?.source;
-  const reasoning = latest?.reasoning;
-  const wetnessIndex = latest?.wetnessIndex;
+  const reasoning = asText(latest?.reasoning, "");
+  const wetnessIndex = typeof latest?.wetnessIndex === "number" ? latest.wetnessIndex : null;
 
   const pct = wetnessIndex != null ? (wetnessIndex / 3) * 100 : 0;
 
@@ -83,12 +91,12 @@ export default function ConditionHero({ trend }) {
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 12, color: "#8b97a8" }}>
-            <span>Wetness index: <strong style={{ color: "#e8edf4" }}>{wetnessIndex}</strong> / 3</span>
+            <span>Wetness index: <strong style={{ color: "#e8edf4" }}>{wetnessIndex ?? "—"}</strong> / 3</span>
             <span className="last-updated">Updated {formatTime(latest.timestamp)}</span>
           </div>
         </div>
 
-        {reasoning && <p className="reasoning">“{reasoning}”</p>}
+        {reasoning && <p className="reasoning">"{reasoning}"</p>}
       </div>
     </div>
   );

@@ -15,8 +15,13 @@ function formatTime(ts) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+function asText(value, fallback = "") {
+  if (typeof value === "string" || typeof value === "number") return value;
+  return fallback;
+}
+
 export default function TrendChart({ trend }) {
-  if (!trend || trend.readings.length === 0) {
+  if (!trend || !Array.isArray(trend.readings) || trend.readings.length === 0) {
     return (
       <div className="card">
         <div className="card-title">Track Trend</div>
@@ -56,6 +61,8 @@ export default function TrendChart({ trend }) {
       ? "suggestion-stable-card"
       : "suggestion-none-card";
 
+  const slopeValue = typeof trend.slope === "number" ? trend.slope : 0;
+
   return (
     <div className="card">
       <div className="card-title">Track Trend</div>
@@ -91,8 +98,12 @@ export default function TrendChart({ trend }) {
           <span className={`trend-arrow ${arrow.cls}`}>{arrow.icon}</span>
           <div>
             <div style={{ fontSize: 12, color: "#8b97a8", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{arrow.label}</div>
-            <div className="suggestion-text">{trend.suggestion}</div>
-            <div className="slope-stat">Slope: {trend.slope >= 0 ? "+" : ""}{trend.slope.toFixed(2)} · Latest: {trend.latestLabel}</div>
+            <div className="suggestion-text">
+              {asText(trend.suggestion, "Unable to load suggestion")}
+            </div>
+            <div className="slope-stat">
+              Slope: {slopeValue >= 0 ? "+" : ""}{slopeValue.toFixed(2)} · Latest: {asText(trend.latestLabel, "—")}
+            </div>
           </div>
         </div>
       </div>

@@ -1,10 +1,22 @@
 // Pit-wall strategy card: trend direction arrow + suggestion message.
 
+// Only ever render strings/numbers in JSX. If the backend ever sends back
+// an error-shaped object (e.g. { code, message }) instead of a plain
+// string for trend.suggestion, this stops it from crashing the whole
+// app with React error #31 ("Objects are not valid as a React child").
+function asText(value, fallback = "") {
+  if (typeof value === "string" || typeof value === "number") return value;
+  return fallback;
+}
+
 export default function SuggestionCard({ trend }) {
   const direction = trend?.trendDirection || "unknown";
-  const suggestion = trend?.suggestion || "No readings yet — upload an image to get started";
+  const suggestion = asText(
+    trend?.suggestion,
+    "No readings yet — upload an image to get started"
+  );
   const slope = typeof trend?.slope === "number" ? trend.slope : 0;
-  const latestLabel = trend?.latestLabel;
+  const latestLabel = asText(trend?.latestLabel, "");
 
   const arrow =
     direction === "drying"
