@@ -7,7 +7,6 @@ import { classifyWithHeuristic } from "../utils/heuristic.js";
 const router = express.Router();
 
 // Memory storage — no disk writes, works on Vercel's read-only/ephemeral filesystem.
-// File stays in RAM as req.file.buffer for the duration of the request only.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
@@ -26,11 +25,9 @@ router.post("/", upload.single("image"), async (req, res) => {
     return res.status(400).json({ error: "No image file provided" });
   }
 
-  const imageBuffer = req.file.buffer; // already in memory, no fs.readFile needed
+  const imageBuffer = req.file.buffer;
   const mediaType = req.file.mimetype;
 
-  // Store the image itself as a base64 data URI directly in MongoDB —
-  // avoids needing any persistent disk/file storage on serverless hosts.
   const base64 = imageBuffer.toString("base64");
   const imageUrl = `data:${mediaType};base64,${base64}`;
 

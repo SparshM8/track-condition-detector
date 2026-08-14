@@ -71,7 +71,6 @@ export default function LiveCameraPanel({ onNewReading }) {
 
   useEffect(() => {
     if (isLive) {
-      // Capture immediately on start, then on the interval
       captureAndAnalyze();
       intervalRef.current = setInterval(captureAndAnalyze, CAPTURE_INTERVAL_MS);
     } else if (intervalRef.current) {
@@ -82,7 +81,6 @@ export default function LiveCameraPanel({ onNewReading }) {
     };
   }, [isLive, captureAndAnalyze]);
 
-  // Stop camera if component unmounts while live
   useEffect(() => {
     return () => stopLive();
     // eslint-disable-next-line react-hooks/exhaustive-deps
