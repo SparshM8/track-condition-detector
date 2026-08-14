@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { getHistory, clearHistory } from "../api.js";
 import { extractErrorMessage } from "../utils/text.js";
 import ConditionBadge from "./ConditionBadge.jsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 function formatTime(ts) {
   const d = new Date(ts);
@@ -11,6 +13,68 @@ function formatTime(ts) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+// Triggers a browser download for any text content (used by CSV + JSON export).
+function downloadTextFile(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function toCSV(readings) {
+  const headers = ["Timestamp", "Label", "Confidence", "Wetness Index", "Weather", "Source", "Reasoning"];
+  const rows = readings.map((r) => [
+    new Date(r.timestamp).toISOString(),
+    r.label,
+    r.confidence,
+    r.wetnessIndex,
+    r.weather || "",
+    r.source || "",
+    (r.reasoning || "").replace(/"/g, '""'), // escape quotes for CSV safety
+  ]);
+
+  const escapeCell = (cell) => {
+    const str = String(cell);
+    // wrap in quotes if the value contains a comma, quote, or newline
+    return /[",\n]/.test(str) ? `"${str}"` : str;
+  };
+
+  const lines = [headers, ...rows].map((row) => row.map(escapeCell).join(","));
+  return lines.join("\n");
+}
+
+function toPDF(readings) {
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Weather Whiplash — Track Condition History", 14, 16);
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.text(`Exported ${new Date().toLocaleString()} · ${readings.length} readings`, 14, 22);
+
+  autoTable(doc, {
+    startY: 28,
+    head: [["Timestamp", "Label", "Confidence", "Wetness", "Weather", "Source"]],
+    body: readings.map((r) => [
+      new Date(r.timestamp).toLocaleString(),
+      r.label,
+      `${Math.round((r.confidence || 0) * 100)}%`,
+      r.wetnessIndex,
+      r.weather || "—",
+      r.source || "—",
+    ]),
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [200, 30, 40] }, // matches the app's red accent
+  });
+
+  doc.save(`track-history-${Date.now()}.pdf`);
 }
 
 export default function HistoryGallery() {
@@ -52,6 +116,22 @@ export default function HistoryGallery() {
     }
   }
 
+  function handleExportJSON() {
+    downloadTextFile(
+      `track-history-${Date.now()}.json`,
+      JSON.stringify(readings, null, 2),
+      "application/json"
+    );
+  }
+
+  function handleExportCSV() {
+    downloadTextFile(`track-history-${Date.now()}.csv`, toCSV(readings), "text/csv");
+  }
+
+  function handleExportPDF() {
+    toPDF(readings);
+  }
+
   return (
     <div className="card">
       <div className="history-section-head">
@@ -59,13 +139,24 @@ export default function HistoryGallery() {
           History ({readings.length} readings)
         </div>
         {readings.length > 0 && (
-          <button
-            className="danger"
-            onClick={() => setConfirmOpen(true)}
-            disabled={clearing}
-          >
-            {clearing ? "Clearing..." : "Clear history"}
-          </button>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button className="secondary" onClick={handleExportJSON}>
+              Export JSON
+            </button>
+            <button className="secondary" onClick={handleExportCSV}>
+              Export CSV
+            </button>
+            <button className="secondary" onClick={handleExportPDF}>
+              Export PDF
+            </button>
+            <button
+              className="danger"
+              onClick={() => setConfirmOpen(true)}
+              disabled={clearing}
+            >
+              {clearing ? "Clearing..." : "Clear history"}
+            </button>
+          </div>
         )}
       </div>
 
