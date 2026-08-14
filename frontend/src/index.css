@@ -699,3 +699,13 @@ body {
 .app {
   background: transparent !important;
 }
+
+.eta-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.eta-dot-wet { background: #4a9eff; }
+.eta-dot-dry { background: #4ade80; }
+.eta-dot-stable { background: #8b97a8; }

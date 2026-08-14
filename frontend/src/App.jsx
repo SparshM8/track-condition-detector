@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import DashboardHeader from "./components/DashboardHeader.jsx";
 import ConditionHero from "./components/ConditionHero.jsx";
 import SuggestionCard from "./components/SuggestionCard.jsx";
+import PitWindowETA from "./components/PitWindowETA.jsx";
 import UploadPanel from "./components/UploadPanel.jsx";
 import LiveCameraPanel from "./components/LiveCameraPanel.jsx";
 import VideoUploadPanel from "./components/VideoUploadPanel.jsx";
@@ -70,6 +71,9 @@ export default function App() {
           <ConditionHero trend={trend} />
           <SuggestionCard trend={trend} />
         </div>
+
+        {/* Predictive ETA until the track crosses the next wetness threshold */}
+        <PitWindowETA trend={trend} />
 
         {activeTab === "live" && <LiveCameraPanel onNewReading={(r) => { refreshTrend(); if (r?.imageUrl) setBackgroundImage(r.imageUrl); }} />}
         {activeTab === "video" && <VideoUploadPanel onNewReadings={(data) => { refreshTrend(); const first = Array.isArray(data?.readings) && data.readings[0]; if (first?.imageUrl) setBackgroundImage(first.imageUrl); }} />}
