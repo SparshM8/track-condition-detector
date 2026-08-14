@@ -10,6 +10,7 @@ import HistoryGallery from "./components/HistoryGallery.jsx";
 import Background3D from "./components/Background3D.jsx";
 import BackgroundVideo from "./components/BackgroundVideo.jsx";
 import BarGraph from "./components/BarGraph.jsx";
+import { usePitRadio } from "./utils/usePitRadio.js";
 import { getTrend } from "./api.js";
 
 const POLL_INTERVAL_MS = 4000;
@@ -28,6 +29,7 @@ export default function App() {
   // Default to the placeholder background so something shows before the
   // first reading comes in; gets replaced with the latest reading's image.
   const [backgroundImage, setBackgroundImage] = useState("/background.jpg");
+  const [pitRadioOn, setPitRadioOn] = useState(true);
 
   const refreshTrend = useCallback(async () => {
     try {
@@ -46,6 +48,9 @@ export default function App() {
     const interval = setInterval(refreshTrend, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [refreshTrend]);
+
+  // Speaks pit-wall suggestions out loud whenever the message changes.
+  usePitRadio(trend, pitRadioOn);
 
   return (
     <div className="app">
@@ -98,6 +103,17 @@ export default function App() {
             Trend chart uses the last 10 readings; the history view keeps every reading.
             Re-analyzing with new images refreshes the live dashboard above.
           </p>
+        </div>
+
+        {/* Pit radio voice-alert toggle */}
+        <div style={{ position: 'fixed', right: 12, bottom: 60, zIndex: 60, background: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 8 }}>
+          <button
+            className="secondary"
+            onClick={() => setPitRadioOn((v) => !v)}
+            style={{ fontSize: 12 }}
+          >
+            {pitRadioOn ? "🔊 Pit Radio: ON" : "🔇 Pit Radio: OFF"}
+          </button>
         </div>
 
         {/* Background opacity control (adjust as needed) */}
