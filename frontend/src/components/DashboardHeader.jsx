@@ -196,12 +196,12 @@ export default function DashboardHeader() {
   useHealth();
 
   return (
-    <header className="header">
+    <header className="header" style={{ paddingTop: 10, paddingBottom: 10 }}>
       <div className="brand">
         <img
           src="/logo.png"
           alt="Turbo Titan"
-          style={{ height: 80, width: "auto", objectFit: "contain" }}
+          style={{ height: 64, width: "auto", objectFit: "contain" }}
         />
       </div>
       <div className="header-right">
