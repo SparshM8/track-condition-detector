@@ -4,6 +4,48 @@ import { getBrowserLocation, fetchWeather } from "../utils/weather.js";
 import { asText, extractErrorMessage } from "../utils/text.js";
 import ConditionBadge from "./ConditionBadge.jsx";
 
+// Resizes/compresses an image client-side before upload — a raw 4-8MB
+// phone photo becomes a ~150-400KB JPEG, which is what was making Gemini
+// classification take ~2 minutes (large base64 payload = slow upload +
+// slow model processing). Caps the longest side at 1280px, which is more
+// than enough detail for surface-condition classification.
+function resizeImage(file, maxDimension = 1280, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error("Failed to resize image"));
+          resolve(new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load image for resizing"));
+    };
+    img.src = url;
+  });
+}
+
 export default function UploadPanel({ onNewReading }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -40,7 +82,8 @@ export default function UploadPanel({ onNewReading }) {
     setLoading(true);
     setError(null);
     try {
-      const result = await analyzeImage(file, weather);
+      const resized = await resizeImage(file);
+      const result = await analyzeImage(resized, weather);
       setLastResult(result);
       onNewReading(result);
     } catch (err) {

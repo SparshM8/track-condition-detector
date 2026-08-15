@@ -1,18 +1,18 @@
+import dotenv from "dotenv";
+dotenv.config();
 import dns from "node:dns";
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
-
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import path from "path";
 
 import analyzeRouter from "./routes/analyze.js";
 import analyzeVideoRouter from "./routes/analyzeVideo.js";
 import trendRouter from "./routes/trend.js";
 
-dotenv.config();
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
